@@ -155,7 +155,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text('Remember me'),
                     const Spacer(),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/forgot-password');
+                      },
                       child: const Text('Forgot password?'),
                     ),
                   ],

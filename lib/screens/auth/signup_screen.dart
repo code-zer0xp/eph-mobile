@@ -212,7 +212,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return;
                     }
                     if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.pushReplacementNamed(context, '/main');
+                      Navigator.pushReplacementNamed(context, '/profile-setup');
                     }
                   },
                 ),

@@ -168,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.pushReplacementNamed(context, '/main');
+                      Navigator.pushReplacementNamed(context, '/profile-setup');
                     }
                   },
                 ),

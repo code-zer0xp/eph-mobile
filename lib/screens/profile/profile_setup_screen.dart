@@ -89,7 +89,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           LinearProgressIndicator(
             value: (_currentStep + 1) / _totalSteps,
             backgroundColor: AppColors.lightGrey,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.secondary),
           ),
           Expanded(
             child: SingleChildScrollView(

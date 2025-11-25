@@ -54,8 +54,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ImageHelper.appLogoWidget(
-                              width: 50,
-                              height: 50,
+                              width: 65,
+                              height: 65,
                             ),
                           ),
                           const SizedBox(width: 12),

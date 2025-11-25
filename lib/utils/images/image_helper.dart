@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ImageHelper {
   // App logo
-  static const String appLogo = 'assets/images/logo.png';
+  static const String appLogo = 'assets/images/logo1.png';
 
   // Placeholder images
   static const String placeholder = 'assets/images/placeholder.png';

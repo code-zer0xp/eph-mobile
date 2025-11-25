@@ -1,353 +1,316 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants/app_colors.dart';
+import '../../utils/constants/category_constants.dart';
 import '../../utils/styles/app_text_styles.dart';
-import '../../widgets/common/custom_button.dart';
-import '../../utils/images/image_helper.dart';
 import '../../utils/toast/toast_helper.dart';
+import '../../widgets/category/category_chip.dart';
+import '../subcategory/subcategory_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  String? selectedCategory;
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOut,
+    ));
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'ExplorePH',
-          style: AppTextStyles.headline5.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primaryLight,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // App Bar
+            SliverAppBar(
+              floating: true,
+              backgroundColor: AppColors.background,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.search,
+                  color: AppColors.primary,
                 ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: ImageHelper.appLogoWidget(
-                          width: 40,
-                          height: 40,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome, Traveler',
-                            style: AppTextStyles.subtitle2
-                                .copyWith(color: Colors.white70),
-                          ),
-                          Text(
-                            'Where do you want to go?',
-                            style: AppTextStyles.headline5
-                                .copyWith(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Discover curated stays, hidden gems, and experiences across the Philippines.',
-                    style: AppTextStyles.bodyText2
-                        .copyWith(color: Colors.white.withOpacity(0.9)),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Features section
-            Text(
-              'Search destinations',
-              style: AppTextStyles.headline4,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search for cities, islands, or experiences',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: const Icon(Icons.tune),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Feature cards
-            Text(
-              'Top categories',
-              style: AppTextStyles.headline4,
-            ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildCategoryChip(context, Icons.hotel, 'Stays'),
-                  _buildCategoryChip(
-                      context, Icons.directions_walk, 'Experiences'),
-                  _buildCategoryChip(context, Icons.tour, 'Tours'),
-                  _buildCategoryChip(context, Icons.restaurant, 'Food'),
-                  _buildCategoryChip(
-                      context, Icons.directions_bus, 'Transport'),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Action buttons
-            Text(
-              'Popular destinations',
-              style: AppTextStyles.headline4,
-            ),
-            const SizedBox(height: 16),
-
-            SizedBox(
-              height: 230,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _popularDestinations.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final destination = _popularDestinations[index];
-                  return _buildDestinationCard(destination);
+                onPressed: () {
+                  ToastHelper.showInfoToast(
+                    message: 'Search feature coming soon!',
+                  );
                 },
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Theme showcase
-            Text(
-              'Quick actions',
-              style: AppTextStyles.headline4,
-            ),
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                Expanded(
-                  child: CustomButton(
-                    text: 'Start exploring',
-                    onPressed: () {
-                      ToastHelper.showSuccessToast(
-                        message: 'Destination search coming soon!',
-                      );
-                    },
-                    icon: const Icon(Icons.explore, size: 18),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ExplorePH',
+                    style: AppTextStyles.headline3.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: CustomButton(
-                    text: 'View saved trips',
-                    type: ButtonType.outlined,
-                    onPressed: () {
-                      ToastHelper.showInfoToast(
-                        message: 'Trip planner coming soon!',
-                      );
-                    },
+                  Text(
+                    'Discover the Philippines',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.primary,
+                  ),
+                  onPressed: () {
+                    ToastHelper.showInfoToast(
+                      message: 'Notifications coming soon!',
+                    );
+                  },
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildFeatureCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: AppTextStyles.subtitle2,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryChip(BuildContext context, IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: _buildFeatureCard(
-        context,
-        icon: icon,
-        title: label,
-        description: '',
-        color: AppColors.primary,
-      ),
-    );
-  }
-
-  static final List<_Destination> _popularDestinations = [
-    _Destination(
-      name: 'Palawan',
-      location: 'El Nido • Coron',
-      tag: 'Island escape',
-    ),
-    _Destination(
-      name: 'Cebu',
-      location: 'Cebu City • Moalboal',
-      tag: 'City & sea',
-    ),
-    _Destination(
-      name: 'Baguio',
-      location: 'Benguet',
-      tag: 'Cool highlands',
-    ),
-  ];
-
-  Widget _buildDestinationCard(_Destination destination) {
-    return Container(
-      width: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ImageHelper.loadImage(
-                ImageHelper.placeholder,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned.fill(
+            // Welcome Section
+            SliverToBoxAdapter(
               child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withOpacity(0.1),
-                      Colors.black.withOpacity(0.6),
+                      AppColors.primary,
+                      AppColors.primaryLight,
                     ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome to',
+                      style: AppTextStyles.bodyText1.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ExplorePH',
+                      style: AppTextStyles.headline2.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your gateway to Philippine tourism',
+                      style: AppTextStyles.bodyText2.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    destination.name,
-                    style: AppTextStyles.subtitle1.copyWith(
-                      color: Colors.white,
+
+            // Main Categories Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Main Categories',
+                      style: AppTextStyles.headline4,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    destination.location,
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.white70,
+                    const SizedBox(height: 16),
+                    // Category Chips
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children:
+                          CategoryConstants.mainCategories.map((category) {
+                        return CategoryChip(
+                          label: category,
+                          isSelected: selectedCategory == category,
+                          onTap: () => _onCategorySelected(category),
+                        );
+                      }).toList(),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      destination.tag,
-                      style: AppTextStyles.caption.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+            ),
+
+            // Subcategories Section
+            if (selectedCategory != null &&
+                CategoryConstants.subcategories.containsKey(selectedCategory))
+              SliverToBoxAdapter(
+                child: AnimatedBuilder(
+                  animation: _fadeAnimation,
+                  builder: (context, child) {
+                    return FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedCategory!,
+                                      style: AppTextStyles.headline4,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    onPressed: _clearSelection,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              if (CategoryConstants.categoryDescriptions
+                                  .containsKey(selectedCategory))
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.primary.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    CategoryConstants.categoryDescriptions[
+                                        selectedCategory]!,
+                                    style: AppTextStyles.bodyText2.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              // Subcategory Cards
+                              ...CategoryConstants
+                                  .subcategories[selectedCategory]!
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index = entry.key;
+                                final subcategory = entry.value;
+                                return SubcategoryCard(
+                                  title: subcategory,
+                                  icon: CategoryConstants
+                                      .subcategoryIcons[subcategory],
+                                  index: index,
+                                  onTap: () =>
+                                      _onSubcategoryTapped(subcategory),
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+            // Bottom padding
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _Destination {
-  final String name;
-  final String location;
-  final String tag;
+  void _onCategorySelected(String category) {
+    setState(() {
+      if (selectedCategory == category) {
+        _clearSelection();
+      } else {
+        selectedCategory = category;
+        _slideController.forward();
+        _fadeController.forward();
+      }
+    });
+  }
 
-  const _Destination({
-    required this.name,
-    required this.location,
-    required this.tag,
-  });
+  void _clearSelection() {
+    _slideController.reverse();
+    _fadeController.reverse().then((_) {
+      setState(() {
+        selectedCategory = null;
+      });
+    });
+  }
+
+  void _onSubcategoryTapped(String subcategory) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SubcategoryDetailScreen(
+          categoryName: selectedCategory!,
+          subcategoryName: subcategory,
+        ),
+      ),
+    );
+  }
 }

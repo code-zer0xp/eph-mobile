@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
 import '../../utils/constants/category_constants.dart';
 import '../../utils/styles/app_text_styles.dart';
+import '../../utils/images/image_helper.dart';
 import '../../widgets/listing/listing_card.dart';
 import '../subcategory/subcategory_detail_screen.dart';
 
@@ -84,18 +85,23 @@ class _DestinationsTabState extends State<DestinationsTab> {
         slivers: [
           // Hero Header
           SliverAppBar(
-            expandedHeight: 200,
+            leadingWidth: 100,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 10, top: 10),
+              child: Text(
+                'ExplorePH',
+                style: AppTextStyles.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Bold',
+                    fontSize: 18),
+              ),
+            ),
+            expandedHeight: 160,
             floating: false,
             pinned: true,
             backgroundColor: AppColors.primary,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Destinations',
-                style: AppTextStyles.headline4.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -106,31 +112,17 @@ class _DestinationsTabState extends State<DestinationsTab> {
                       color: AppColors.primary,
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          AppColors.primary.withOpacity(0.8),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             actions: [
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.magnifyingGlass,
-                    color: Colors.white, size: 18),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.filter,
-                    color: Colors.white, size: 18),
-                onPressed: () {},
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage(ImageHelper.profilePlaceholder),
+                ),
               ),
             ],
           ),
@@ -187,7 +179,9 @@ class _DestinationsTabState extends State<DestinationsTab> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Featured Destinations',
+                    selectedSubcategory == null
+                        ? 'Featured Destinations'
+                        : 'Featured ${selectedSubcategory!}',
                     style: AppTextStyles.headline4.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -327,43 +321,40 @@ class _DestinationsTabState extends State<DestinationsTab> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            fit: StackFit.expand,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: AppColors.primary.withOpacity(0.3),
-                  child: const Icon(Icons.image, color: Colors.white54),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.7),
-                    ],
+              Expanded(
+                flex: 3,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: AppColors.primary.withOpacity(0.3),
+                    child: const FaIcon(
+                      FontAwesomeIcons.image,
+                      color: Colors.white54,
+                      size: 32,
+                    ),
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                right: 8,
-                child: Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+              Expanded(
+                flex: 1,
+                child: Container(
+                  color: Colors.white,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
                 ),
               ),
             ],

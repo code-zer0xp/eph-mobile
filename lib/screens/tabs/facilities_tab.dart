@@ -1,3 +1,4 @@
+import 'package:exploreph/utils/images/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
@@ -90,18 +91,23 @@ class _FacilitiesTabState extends State<FacilitiesTab> {
         slivers: [
           // Hero Header
           SliverAppBar(
-            expandedHeight: 180,
+            leadingWidth: 100,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 10, top: 10),
+              child: Text(
+                'ExplorePH',
+                style: AppTextStyles.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Bold',
+                    fontSize: 18),
+              ),
+            ),
+            expandedHeight: 160,
             floating: false,
             pinned: true,
             backgroundColor: AppColors.primary,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Facilities',
-                style: AppTextStyles.headline4.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -128,38 +134,15 @@ class _FacilitiesTabState extends State<FacilitiesTab> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.magnifyingGlass,
-                    color: Colors.white, size: 18),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.sliders,
-                    color: Colors.white, size: 18),
-                onPressed: () {},
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage(ImageHelper.profilePlaceholder),
+                ),
               ),
             ],
-          ),
-
-          // Quick Filters
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                      child:
-                          _buildQuickFilter(FontAwesomeIcons.hotel, 'Hotels')),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: _buildQuickFilter(
-                          FontAwesomeIcons.utensils, 'Dining')),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: _buildQuickFilter(FontAwesomeIcons.bed, 'Stay')),
-                ],
-              ),
-            ),
           ),
 
           // Subcategory Chips

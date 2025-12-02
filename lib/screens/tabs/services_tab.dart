@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
 import '../../utils/constants/category_constants.dart';
 import '../../utils/styles/app_text_styles.dart';
+import '../../utils/images/image_helper.dart';
 import '../subcategory/subcategory_detail_screen.dart';
 
 class ServicesTab extends StatefulWidget {
@@ -15,6 +16,7 @@ class ServicesTab extends StatefulWidget {
 class _ServicesTabState extends State<ServicesTab> {
   final List<String> subcategories =
       CategoryConstants.subcategories['Services'] ?? [];
+  String? selectedSubcategory;
 
   // Featured services
   final List<Map<String, dynamic>> featuredServices = [
@@ -72,24 +74,36 @@ class _ServicesTabState extends State<ServicesTab> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> filteredServices =
+        selectedSubcategory == null
+            ? featuredServices
+            : featuredServices
+                .where((s) => s['category'] == selectedSubcategory)
+                .toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // App Bar
+          // App Bar with banner and pinned filters
           SliverAppBar(
+            leadingWidth: 200,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 10, top: 10),
+              child: Text(
+                'ExplorePH',
+                style: AppTextStyles.caption.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Bold',
+                    fontSize: 18),
+              ),
+            ),
             expandedHeight: 160,
             floating: false,
             pinned: true,
             backgroundColor: AppColors.primary,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Services',
-                style: AppTextStyles.headline4.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -116,44 +130,67 @@ class _ServicesTabState extends State<ServicesTab> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.magnifyingGlass,
-                    color: Colors.white, size: 18),
-                onPressed: () {},
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage(ImageHelper.profilePlaceholder),
+                ),
               ),
             ],
-          ),
-
-          // Service Categories Grid
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'What do you need?',
-                    style: AppTextStyles.headline4.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: subcategories.map((name) {
+                      final isSelected = selectedSubcategory == name;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          avatar: FaIcon(
+                            _getServiceIcon(name),
+                            size: 14,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedSubcategory = selected ? name : null;
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: AppColors.primary.withOpacity(0.2),
+                          checkmarkColor: AppColors.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.lightGrey,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  const SizedBox(height: 16),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: subcategories.length,
-                    itemBuilder: (context, index) {
-                      return _buildServiceCategory(subcategories[index]);
-                    },
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -166,15 +203,19 @@ class _ServicesTabState extends State<ServicesTab> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Top Services',
+                    selectedSubcategory == null
+                        ? 'Featured Services'
+                        : 'Featured ${selectedSubcategory!}',
                     style: AppTextStyles.headline4.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   TextButton(
                     onPressed: () {},
-                    child: Text('See All',
-                        style: TextStyle(color: AppColors.primary)),
+                    child: Text(
+                      'See All',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
                   ),
                 ],
               ),
@@ -187,13 +228,14 @@ class _ServicesTabState extends State<ServicesTab> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final service = featuredServices[index];
+                  if (index >= filteredServices.length) return null;
+                  final service = filteredServices[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _buildServiceCard(service),
                   );
                 },
-                childCount: featuredServices.length,
+                childCount: filteredServices.length,
               ),
             ),
           ),
@@ -208,17 +250,6 @@ class _ServicesTabState extends State<ServicesTab> {
   }
 
   Widget _buildServiceCategory(String name) {
-    final icons = {
-      'Travel and Tour Agency': FontAwesomeIcons.earthAsia,
-      'Travel Agency': FontAwesomeIcons.plane,
-      'Land Tourist Transport': FontAwesomeIcons.bus,
-      'Water Tourist Transport': FontAwesomeIcons.ship,
-      'Air Tourist Transport': FontAwesomeIcons.planeDeparture,
-      'MICE Organizer': FontAwesomeIcons.calendarCheck,
-      'Regional Tour Guide': FontAwesomeIcons.personWalkingLuggage,
-      'Community Guide': FontAwesomeIcons.peopleGroup,
-    };
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -255,7 +286,7 @@ class _ServicesTabState extends State<ServicesTab> {
               ],
             ),
             child: Icon(
-              icons[name] ?? FontAwesomeIcons.bellConcierge,
+              _getServiceIcon(name),
               color: Colors.white,
               size: 22,
             ),
@@ -511,5 +542,27 @@ class _ServicesTabState extends State<ServicesTab> {
         Text(label, style: AppTextStyles.caption),
       ],
     );
+  }
+
+  IconData _getServiceIcon(String name) {
+    switch (name) {
+      case 'Travel and Tour Agency':
+      case 'Travel Agency':
+        return FontAwesomeIcons.earthAsia;
+      case 'Land Tourist Transport':
+        return FontAwesomeIcons.bus;
+      case 'Water Tourist Transport':
+        return FontAwesomeIcons.ship;
+      case 'Air Tourist Transport':
+        return FontAwesomeIcons.planeDeparture;
+      case 'MICE Organizer':
+        return FontAwesomeIcons.calendarCheck;
+      case 'Regional Tour Guide':
+        return FontAwesomeIcons.personWalkingLuggage;
+      case 'Community Guide':
+        return FontAwesomeIcons.peopleGroup;
+      default:
+        return FontAwesomeIcons.bellConcierge;
+    }
   }
 }

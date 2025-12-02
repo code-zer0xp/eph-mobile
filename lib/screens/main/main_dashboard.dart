@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
 import '../../utils/styles/app_text_styles.dart';
+import '../../utils/images/image_helper.dart';
 import '../tabs/destinations_tab.dart';
 import '../tabs/facilities_tab.dart';
 import '../tabs/services_tab.dart';
@@ -65,13 +66,12 @@ class _MainDashboardState extends State<MainDashboard> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: const FaIcon(
-                  FontAwesomeIcons.mapLocationDot,
-                  color: Colors.white,
-                  size: 48,
+                child: ImageHelper.appLogoWidget(
+                  width: 72,
+                  height: 72,
                 ),
               ),
               const SizedBox(height: 24),
@@ -90,31 +90,6 @@ class _MainDashboardState extends State<MainDashboard> {
                   color: Colors.white.withOpacity(0.9),
                 ),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildQuickAction(
-                      FontAwesomeIcons.mountain,
-                      'Destinations',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildQuickAction(
-                      FontAwesomeIcons.hotel,
-                      'Stay',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildQuickAction(
-                      FontAwesomeIcons.comments,
-                      'Connect',
-                    ),
-                  ),
-                ],
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -142,33 +117,6 @@ class _MainDashboardState extends State<MainDashboard> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          FaIcon(
-            icon,
-            color: Colors.white,
-            size: 20,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

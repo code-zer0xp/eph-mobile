@@ -12,6 +12,7 @@ class ChatTab extends StatefulWidget {
 
 class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late TextEditingController _groupNameController;
 
   final List<Map<String, dynamic>> worldChats = [
     {
@@ -108,6 +109,7 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
           'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100',
       'unread': 2,
       'online': true,
+      'isGroup': false,
     },
     {
       'name': 'Juan dela Cruz',
@@ -117,6 +119,7 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
       'unread': 0,
       'online': true,
+      'isGroup': false,
     },
     {
       'name': 'Ana Reyes',
@@ -126,6 +129,7 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
           'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
       'unread': 0,
       'online': false,
+      'isGroup': false,
     },
     {
       'name': 'Island Hopper Tours',
@@ -135,6 +139,7 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
           'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=100',
       'unread': 0,
       'online': false,
+      'isGroup': false,
     },
   ];
 
@@ -142,10 +147,12 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _groupNameController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _groupNameController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -254,7 +261,11 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          if (_tabController.index == 2) {
+            _showCreateGroupDialog();
+          }
+        },
         backgroundColor: AppColors.primary,
         child: const FaIcon(FontAwesomeIcons.plus, color: Colors.white),
       ),
@@ -262,32 +273,18 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildWorldChats() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: worldChats.length,
-      itemBuilder: (context, index) {
-        final chat = worldChats[index];
-        return _buildChatTile(
-          chat,
-          subtitle: '${chat['members']} members',
-          isGroup: true,
-        );
-      },
+    final chat = worldChats.first;
+    return Container(
+      color: Colors.white,
+      child: _buildChatContent(chat, isGroup: true),
     );
   }
 
   Widget _buildCountryChats() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: countryChats.length,
-      itemBuilder: (context, index) {
-        final chat = countryChats[index];
-        return _buildChatTile(
-          chat,
-          subtitle: chat['region'],
-          isGroup: true,
-        );
-      },
+    final chat = countryChats.first;
+    return Container(
+      color: Colors.white,
+      child: _buildChatContent(chat, isGroup: true),
     );
   }
 
@@ -297,7 +294,10 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
       itemCount: personalChats.length,
       itemBuilder: (context, index) {
         final chat = personalChats[index];
-        return _buildChatTile(chat, isGroup: false);
+        return _buildChatTile(
+          chat,
+          isGroup: chat['isGroup'] == true,
+        );
       },
     );
   }
@@ -452,146 +452,227 @@ class _ChatTabState extends State<ChatTab> with SingleTickerProviderStateMixin {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.lightGrey,
-                borderRadius: BorderRadius.circular(2),
-              ),
+        child: _buildChatContent(
+          chat,
+          showHandleBar: true,
+          isGroup: chat['isGroup'] == true,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatContent(Map<String, dynamic> chat,
+      {bool showHandleBar = false, bool isGroup = false}) {
+    return Column(
+      children: [
+        if (showHandleBar)
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.lightGrey,
+              borderRadius: BorderRadius.circular(2),
             ),
-            // Chat header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.lightGrey),
-                ),
+          ),
+        // Chat header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: AppColors.lightGrey),
+            ),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundImage: NetworkImage(chat['avatar']),
               ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(chat['avatar']),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          chat['name'],
-                          style: AppTextStyles.headline4,
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: chat['online']
-                                    ? AppColors.success
-                                    : AppColors.grey,
-                                shape: BoxShape.circle,
-                              ),
+                        if (isGroup)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: FaIcon(
+                              FontAwesomeIcons.userGroup,
+                              size: 14,
+                              color: AppColors.textSecondary,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              chat['online'] ? 'Online' : 'Offline',
-                              style: AppTextStyles.caption,
-                            ),
-                          ],
+                          ),
+                        Expanded(
+                          child: Text(
+                            chat['name'],
+                            style: AppTextStyles.headline4,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  IconButton(
-                    icon: const FaIcon(FontAwesomeIcons.phone, size: 18),
-                    onPressed: () {},
-                    color: AppColors.primary,
-                  ),
-                  IconButton(
-                    icon: const FaIcon(FontAwesomeIcons.video, size: 18),
-                    onPressed: () {},
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
-            ),
-            // Chat messages placeholder
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FaIcon(
-                      FontAwesomeIcons.comments,
-                      size: 64,
-                      color: AppColors.lightGrey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Start a conversation',
-                      style: AppTextStyles.bodyText1.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: chat['online'] == true
+                                ? AppColors.success
+                                : AppColors.grey,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          chat['online'] == true ? 'Online' : 'Offline',
+                          style: AppTextStyles.caption,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.phone, size: 18),
+                onPressed: () {},
+                color: AppColors.primary,
+              ),
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.video, size: 18),
+                onPressed: () {},
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+        // Chat messages placeholder
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.comments,
+                  size: 64,
+                  color: AppColors.lightGrey,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Start a conversation',
+                  style: AppTextStyles.bodyText1.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
-            // Message input
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(color: AppColors.lightGrey),
+          ),
+        ),
+        // Message input
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: AppColors.lightGrey),
+            ),
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: FaIcon(FontAwesomeIcons.paperclip,
+                    color: AppColors.textSecondary, size: 20),
+                onPressed: () {},
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      hintStyle: TextStyle(color: AppColors.textSecondary),
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: FaIcon(FontAwesomeIcons.paperclip,
-                        color: AppColors.textSecondary, size: 20),
-                    onPressed: () {},
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          hintStyle: TextStyle(color: AppColors.textSecondary),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const FaIcon(FontAwesomeIcons.paperPlane,
-                        color: Colors.white, size: 18),
-                  ),
-                ],
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const FaIcon(FontAwesomeIcons.paperPlane,
+                    color: Colors.white, size: 18),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showCreateGroupDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Create Group Chat',
+            style: AppTextStyles.headline4,
+          ),
+          content: TextField(
+            controller: _groupNameController,
+            decoration: InputDecoration(
+              labelText: 'Group name',
+              hintText: 'e.g. Barkada Trip 2025',
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _groupNameController.clear();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = _groupNameController.text.trim();
+                if (name.isEmpty) return;
+
+                setState(() {
+                  personalChats.insert(0, {
+                    'name': name,
+                    'lastMessage': 'Group created',
+                    'time': 'Just now',
+                    'avatar':
+                        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100',
+                    'unread': 0,
+                    'online': true,
+                    'isGroup': true,
+                  });
+                });
+
+                _groupNameController.clear();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Create'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

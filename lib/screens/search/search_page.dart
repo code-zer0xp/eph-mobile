@@ -6,8 +6,9 @@ import '../../widgets/listing/listing_card_v2.dart';
 
 class SearchPage extends StatefulWidget {
   final String? initialQuery;
+  final VoidCallback? onBack;
 
-  const SearchPage({super.key, this.initialQuery});
+  const SearchPage({super.key, this.initialQuery, this.onBack});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -264,15 +265,24 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           // Back button
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              if (widget.onBack != null) {
+                widget.onBack!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: AppColors.lightGrey.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: FaIcon(FontAwesomeIcons.arrowLeft,
-                  size: 16, color: AppColors.textPrimary),
+              child: FaIcon(
+                FontAwesomeIcons.arrowLeft,
+                size: 16,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           const SizedBox(width: 12),

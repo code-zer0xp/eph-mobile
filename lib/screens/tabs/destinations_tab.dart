@@ -1,3 +1,4 @@
+import 'package:exploreph/screens/search/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
@@ -14,9 +15,16 @@ class DestinationsTab extends StatefulWidget {
   State<DestinationsTab> createState() => _DestinationsTabState();
 }
 
-class _DestinationsTabState extends State<DestinationsTab> {
+class _DestinationsTabState extends State<DestinationsTab>
+    with SingleTickerProviderStateMixin {
   String? selectedSubcategory;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+
+  // Search panel state
+  bool _isSearchExpanded = false;
+  late AnimationController _searchAnimController;
+  late Animation<double> _searchAnimation;
 
   final List<String> subcategories =
       CategoryConstants.subcategories['Destinations'] ?? [];
@@ -110,243 +118,329 @@ class _DestinationsTabState extends State<DestinationsTab> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _searchAnimController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _searchAnimation = CurvedAnimation(
+      parent: _searchAnimController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _searchAnimController.dispose();
     super.dispose();
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearchExpanded = !_isSearchExpanded;
+      if (_isSearchExpanded) {
+        _searchAnimController.forward();
+      } else {
+        _searchAnimController.reverse();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          // Hero Header
-          SliverAppBar(
-            leadingWidth: 100,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
-              child: Text(
-                'ExplorePH',
-                style: AppTextStyles.caption.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: 'Bold',
-                    fontSize: 18),
-              ),
-            ),
-            expandedHeight: 160,
-            floating: false,
-            pinned: true,
-            backgroundColor: AppColors.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppColors.primary,
-                    ),
+      body: Stack(
+        children: [
+          // Main Content
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              // Hero Header
+              SliverAppBar(
+                leadingWidth: 100,
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 10, top: 10),
+                  child: Text(
+                    'ExplorePH',
+                    style: AppTextStyles.caption.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'Bold',
+                        fontSize: 18),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          AppColors.primary.withOpacity(0.8),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundColor: Colors.white,
-                  backgroundImage: AssetImage(ImageHelper.profilePlaceholder),
                 ),
-              ),
-            ],
-          ),
-
-          // Subcategory Chips
-          SliverToBoxAdapter(
-            child: Container(
-              height: 60,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: subcategories.length,
-                itemBuilder: (context, index) {
-                  final subcategory = subcategories[index];
-                  final isSelected = selectedSubcategory == subcategory;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(subcategory),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          selectedSubcategory = selected ? subcategory : null;
-                        });
-                      },
-                      backgroundColor: Colors.white,
-                      selectedColor: AppColors.primary.withOpacity(0.2),
-                      checkmarkColor: AppColors.primary,
-                      labelStyle: TextStyle(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                expandedHeight: 160,
+                floating: false,
+                pinned: true,
+                backgroundColor: AppColors.primary,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.primary,
+                        ),
                       ),
-                      side: BorderSide(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.lightGrey,
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              AppColors.primary.withOpacity(0.8),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Featured Section Title
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    selectedSubcategory == null
-                        ? 'Featured Destinations'
-                        : 'Featured ${selectedSubcategory!}',
-                    style: AppTextStyles.headline4.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'See All',
-                      style: TextStyle(color: AppColors.primary),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundColor: Colors.white,
+                      backgroundImage:
+                          AssetImage(ImageHelper.profilePlaceholder),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
 
-          // Featured Destinations Grid (v2)
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final filteredDestinations = selectedSubcategory == null
-                      ? featuredDestinations
-                      : featuredDestinations
-                          .where((d) => d['category'] == selectedSubcategory)
-                          .toList();
-
-                  if (index >= filteredDestinations.length) return null;
-                  final item = filteredDestinations[index];
-
-                  return ListingCardV2(
-                    name: item['name'],
-                    location: item['location'],
-                    city: item['city'] ?? '',
-                    province: item['province'] ?? '',
-                    imageUrl: item['image'],
-                    priceRange: item['priceRange'],
-                    highlight: item['highlight'],
-                    rating: item['rating'],
-                    reviews: item['reviews'],
-                    hashtags: List<String>.from(item['hashtags'] ?? []),
-                    onAddToItinerary: () => _handleAddToItinerary(item),
-                    onAddToBucketList: () => _handleAddToBucketList(item),
-                    onShare: () => _showShareDialog(item['name']),
-                    onViewDetails: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SubcategoryDetailScreen(
-                            categoryName: 'Destinations',
-                            subcategoryName: item['category'],
+              // Subcategory Chips
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: subcategories.length,
+                    itemBuilder: (context, index) {
+                      final subcategory = subcategories[index];
+                      final isSelected = selectedSubcategory == subcategory;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(subcategory),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedSubcategory =
+                                  selected ? subcategory : null;
+                            });
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: AppColors.primary.withOpacity(0.2),
+                          checkmarkColor: AppColors.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.lightGrey,
                           ),
                         ),
                       );
                     },
-                  );
-                },
-                childCount: selectedSubcategory == null
-                    ? featuredDestinations.length
-                    : featuredDestinations
-                        .where((d) => d['category'] == selectedSubcategory)
-                        .length,
+                  ),
+                ),
               ),
-            ),
-          ),
 
-          // Popular Categories
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-              child: Text(
-                'Explore by Category',
-                style: AppTextStyles.headline4.copyWith(
-                  fontWeight: FontWeight.bold,
+              // Featured Section Title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        selectedSubcategory == null
+                            ? 'Featured Destinations'
+                            : 'Featured ${selectedSubcategory!}',
+                        style: AppTextStyles.headline4.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'See All',
+                          style: TextStyle(color: AppColors.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Featured Destinations Grid (v2)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.85,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final filteredDestinations = selectedSubcategory == null
+                          ? featuredDestinations
+                          : featuredDestinations
+                              .where(
+                                  (d) => d['category'] == selectedSubcategory)
+                              .toList();
+
+                      if (index >= filteredDestinations.length) return null;
+                      final item = filteredDestinations[index];
+
+                      return ListingCardV2(
+                        name: item['name'],
+                        location: item['location'],
+                        city: item['city'] ?? '',
+                        province: item['province'] ?? '',
+                        imageUrl: item['image'],
+                        priceRange: item['priceRange'],
+                        highlight: item['highlight'],
+                        rating: item['rating'],
+                        reviews: item['reviews'],
+                        hashtags: List<String>.from(item['hashtags'] ?? []),
+                        onAddToItinerary: () => _handleAddToItinerary(item),
+                        onAddToBucketList: () => _handleAddToBucketList(item),
+                        onShare: () => _showShareDialog(item['name']),
+                        onViewDetails: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SubcategoryDetailScreen(
+                                categoryName: 'Destinations',
+                                subcategoryName: item['category'],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    childCount: selectedSubcategory == null
+                        ? featuredDestinations.length
+                        : featuredDestinations
+                            .where((d) => d['category'] == selectedSubcategory)
+                            .length,
+                  ),
+                ),
+              ),
+
+              // Popular Categories
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                  child: Text(
+                    'Explore by Category',
+                    style: AppTextStyles.headline4.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 1,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index >= subcategories.length) return null;
+                      final subcategory = subcategories[index];
+                      final imageUrl = CategoryConstants
+                              .subcategoryImages[subcategory] ??
+                          'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400';
+
+                      return _buildCategoryCard(subcategory, imageUrl);
+                    },
+                    childCount:
+                        subcategories.length > 9 ? 9 : subcategories.length,
+                  ),
+                ),
+              ),
+
+              // Bottom spacing
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
+            ],
+          ),
+          // Floating Search Button - Pinned to left
+          Positioned(
+            left: 0,
+            top: MediaQuery.of(context).padding.top + 50,
+            child: GestureDetector(
+              onTap: _toggleSearch,
+              child: AnimatedContainer(
+                height: 50,
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _isSearchExpanded ? Colors.white : AppColors.primary,
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(14),
+                    topRight: Radius.circular(14),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          (_isSearchExpanded ? Colors.black : AppColors.primary)
+                              .withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FaIcon(
+                  _isSearchExpanded
+                      ? FontAwesomeIcons.xmark
+                      : FontAwesomeIcons.magnifyingGlass,
+                  size: 18,
+                  color: _isSearchExpanded ? AppColors.primary : Colors.white,
                 ),
               ),
             ),
           ),
-
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index >= subcategories.length) return null;
-                  final subcategory = subcategories[index];
-                  final imageUrl = CategoryConstants
-                          .subcategoryImages[subcategory] ??
-                      'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=400';
-
-                  return _buildCategoryCard(subcategory, imageUrl);
-                },
-                childCount: subcategories.length > 9 ? 9 : subcategories.length,
-              ),
+          // Expanded Search Panel
+          if (_isSearchExpanded)
+            AnimatedBuilder(
+              animation: _searchAnimation,
+              builder: (context, child) {
+                return Positioned.fill(
+                  child: FadeTransition(
+                    opacity: _searchAnimation,
+                    child: SearchPage(
+                      onBack: _toggleSearch,
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-
-          // Bottom spacing
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 100),
-          ),
         ],
       ),
     );

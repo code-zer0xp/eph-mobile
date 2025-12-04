@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../utils/constants/app_colors.dart';
 import '../../utils/constants/category_constants.dart';
 import '../../utils/styles/app_text_styles.dart';
 import '../../utils/toast/toast_helper.dart';
 import '../../widgets/category/category_chip.dart';
 import '../subcategory/subcategory_detail_screen.dart';
+import '../search/search_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,53 +63,110 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // App Bar
-            SliverAppBar(
-              floating: true,
-              backgroundColor: AppColors.background,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.search,
-                  color: AppColors.primary,
-                ),
-                onPressed: () {
-                  ToastHelper.showInfoToast(
-                    message: 'Search feature coming soon!',
-                  );
-                },
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ExplorePH',
-                    style: AppTextStyles.headline3.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
+            // Floating Search Bar Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    // Floating Search Bar
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _openSearchPage(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.magnifyingGlass,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Search destinations, hotels...',
+                                  style: AppTextStyles.bodyText2.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: FaIcon(
+                                  FontAwesomeIcons.sliders,
+                                  size: 12,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Discover the Philippines',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
+                    const SizedBox(width: 12),
+                    // Notification Button
+                    GestureDetector(
+                      onTap: () {
+                        ToastHelper.showInfoToast(
+                          message: 'Notifications coming soon!',
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.bell,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  icon: Icon(
-                    Icons.notifications_outlined,
-                    color: AppColors.primary,
-                  ),
-                  onPressed: () {
-                    ToastHelper.showInfoToast(
-                      message: 'Notifications coming soon!',
-                    );
-                  },
+                  ],
                 ),
-              ],
+              ),
             ),
 
             // Welcome Section
@@ -310,6 +369,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           categoryName: selectedCategory!,
           subcategoryName: subcategory,
         ),
+      ),
+    );
+  }
+
+  void _openSearchPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SearchPage(),
       ),
     );
   }

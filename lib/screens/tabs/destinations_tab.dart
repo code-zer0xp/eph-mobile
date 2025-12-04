@@ -4,7 +4,7 @@ import '../../utils/constants/app_colors.dart';
 import '../../utils/constants/category_constants.dart';
 import '../../utils/styles/app_text_styles.dart';
 import '../../utils/images/image_helper.dart';
-import '../../widgets/listing/listing_card.dart';
+import '../../widgets/listing/listing_card_v2.dart';
 import '../subcategory/subcategory_detail_screen.dart';
 
 class DestinationsTab extends StatefulWidget {
@@ -21,52 +21,91 @@ class _DestinationsTabState extends State<DestinationsTab> {
   final List<String> subcategories =
       CategoryConstants.subcategories['Destinations'] ?? [];
 
-  // Featured destinations with images
+  // Featured destinations with images (v2 format)
   final List<Map<String, dynamic>> featuredDestinations = [
     {
-      'name': 'Palawan Paradise',
+      'name': 'Palawan Paradise Resort',
       'location': 'El Nido, Palawan',
+      'city': 'El Nido',
+      'province': 'Palawan',
       'image':
           'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=600',
+      'priceRange': '₱3,500 - ₱8,000',
+      'highlight': 'Beachfront with stunning sunset views',
       'rating': 4.9,
       'reviews': 2341,
       'category': 'Islands',
+      'hashtags': ['beach', 'island', 'resort', 'featured'],
     },
     {
-      'name': 'Chocolate Hills',
-      'location': 'Bohol',
+      'name': 'Chocolate Hills Adventure',
+      'location': 'Carmen, Bohol',
+      'city': 'Carmen',
+      'province': 'Bohol',
       'image':
           'https://images.unsplash.com/photo-1570789210967-2cac24634872?w=600',
+      'priceRange': '₱500 - ₱1,500',
+      'highlight': 'UNESCO World Heritage Site',
       'rating': 4.8,
       'reviews': 1892,
       'category': 'Mountain',
+      'hashtags': ['nature', 'landmark', 'adventure'],
     },
     {
-      'name': 'Mayon Volcano',
-      'location': 'Albay, Bicol',
+      'name': 'Mayon Volcano View',
+      'location': 'Legazpi, Albay',
+      'city': 'Legazpi',
+      'province': 'Albay',
       'image':
           'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600',
+      'priceRange': '₱200 - ₱800',
+      'highlight': 'Perfect cone volcano view',
       'rating': 4.9,
       'reviews': 3102,
       'category': 'Mountain',
+      'hashtags': ['volcano', 'nature', 'scenic'],
     },
     {
       'name': 'Boracay White Beach',
-      'location': 'Aklan',
+      'location': 'Malay, Aklan',
+      'city': 'Malay',
+      'province': 'Aklan',
       'image':
           'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600',
+      'priceRange': '₱2,000 - ₱15,000',
+      'highlight': 'World-famous white sand beach',
       'rating': 4.7,
       'reviews': 5234,
       'category': 'Beach',
+      'hashtags': ['beach', 'nightlife', 'watersports'],
     },
     {
       'name': 'Kawasan Falls',
-      'location': 'Cebu',
+      'location': 'Badian, Cebu',
+      'city': 'Badian',
+      'province': 'Cebu',
       'image':
           'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=600',
+      'priceRange': '₱300 - ₱1,200',
+      'highlight': 'Turquoise blue waterfalls',
       'rating': 4.8,
       'reviews': 2156,
       'category': 'Falls',
+      'hashtags': ['waterfall', 'canyoneering', 'adventure'],
+    },
+    {
+      'name': 'Banaue Rice Terraces',
+      'location': 'Banaue, Ifugao',
+      'city': 'Banaue',
+      'province': 'Ifugao',
+      'image':
+          'https://images.unsplash.com/photo-1518638150340-f706e86654de?w=600',
+      'priceRange': '₱1,500 - ₱3,500',
+      'highlight': '8th Wonder of the World',
+      'rating': 4.9,
+      'reviews': 1890,
+      'category': 'Mountain',
+      'hashtags': ['heritage', 'trekking', 'culture'],
     },
   ];
 
@@ -110,6 +149,18 @@ class _DestinationsTabState extends State<DestinationsTab> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: AppColors.primary,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          AppColors.primary.withOpacity(0.8),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -198,7 +249,7 @@ class _DestinationsTabState extends State<DestinationsTab> {
             ),
           ),
 
-          // Featured Destinations Grid
+          // Featured Destinations Grid (v2)
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid(
@@ -206,11 +257,10 @@ class _DestinationsTabState extends State<DestinationsTab> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 0.75,
+                childAspectRatio: 0.85,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final destination = featuredDestinations[index];
                   final filteredDestinations = selectedSubcategory == null
                       ? featuredDestinations
                       : featuredDestinations
@@ -220,13 +270,21 @@ class _DestinationsTabState extends State<DestinationsTab> {
                   if (index >= filteredDestinations.length) return null;
                   final item = filteredDestinations[index];
 
-                  return ListingCard(
+                  return ListingCardV2(
                     name: item['name'],
                     location: item['location'],
+                    city: item['city'] ?? '',
+                    province: item['province'] ?? '',
                     imageUrl: item['image'],
+                    priceRange: item['priceRange'],
+                    highlight: item['highlight'],
                     rating: item['rating'],
                     reviews: item['reviews'],
-                    onTap: () {
+                    hashtags: List<String>.from(item['hashtags'] ?? []),
+                    onAddToItinerary: () => _handleAddToItinerary(item),
+                    onAddToBucketList: () => _handleAddToBucketList(item),
+                    onShare: () => _showShareDialog(item['name']),
+                    onViewDetails: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -237,7 +295,6 @@ class _DestinationsTabState extends State<DestinationsTab> {
                         ),
                       );
                     },
-                    onShare: () => _showShareDialog(item['name']),
                   );
                 },
                 childCount: selectedSubcategory == null
@@ -360,6 +417,42 @@ class _DestinationsTabState extends State<DestinationsTab> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _handleAddToItinerary(Map<String, dynamic> item) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const FaIcon(FontAwesomeIcons.circleCheck,
+                color: Colors.white, size: 16),
+            const SizedBox(width: 10),
+            Expanded(child: Text('${item['name']} added to Itinerary')),
+          ],
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  void _handleAddToBucketList(Map<String, dynamic> item) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const FaIcon(FontAwesomeIcons.circleCheck,
+                color: Colors.white, size: 16),
+            const SizedBox(width: 10),
+            Expanded(child: Text('${item['name']} added to Bucket List')),
+          ],
+        ),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
